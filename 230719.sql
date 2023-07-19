@@ -232,3 +232,38 @@ SELECT * FROM usertbl;
 SELECT 
 	addr,AVG(height) AS '평균키' 
 FROM userTbl GROUP BY addr ORDER BY 평균키 DESC ;
+
+-- 지역별 평균키를 출력하되 전체 평균키도 같이 출력
+-- WITH ROLLUP -> 항목별 합계에 전체 합계를 같이 검색해주는 키워드
+SELECT 
+	addr, AVG(height) AS '평균키' 
+FROM userTbl GROUP BY addr WITH ROLLUP ORDER BY 평균키 DESC;
+
+-- 총 구매액이 1000이상인 사용자를 검색하세요. 
+SELECT * FROM buyTbl;
+-- where은 group by 뒤에 올 수 없다. 
+-- 뒤에 조건이 필요하면 HAVING을 써야 한다. 
+
+SELECT 
+	userId, sum(price * amount) AS '구매금액'
+FROM buyTbl GROUP BY userId HAVING 구매금액 >= 1000;
+
+SELECT 
+	userId, sum(price * amount) AS '구매금액'
+FROM buyTbl WHERE prodName IN('모니터', '노트북')
+GROUP BY userId HAVING 구매금액 >=1000;
+
+-- userID가 JYP인 회원보다 총 구매 금액이 높은 회원의 userId와 구매금액 검색
+SELECT sum(price * amount) FROM buytbl
+WHERE userId = 'JYP';
+
+SELECT
+	userId, sum(price * amount) As '구매금액'
+FROM buyTbl GROUP BY userId HAVING 구매금액>(
+	SELECT sum(price * amount) FROM buyTbl WHERE userId = 'JYP'
+);
+
+-- 총 주문횟수가 3번 이상인 회원의 userId와 구매횟수 검색
+SELECT userId, count(*) AS '주문횟수'
+	FROM buyTbl GROUP BY userId WITH ROLLUP HAVING 주문횟수 >=3; 
+
