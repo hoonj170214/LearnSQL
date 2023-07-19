@@ -229,4 +229,6 @@ FROM buyTbl GROUP BY groupname;
 
 -- 지역별 평균 키를 역순으로 정렬하여 출력
 SELECT * FROM usertbl;
-SELECT addr,AVG(height) FROM userTbl GROUP BY addr;
+SELECT 
+	addr,AVG(height) AS '평균키' 
+FROM userTbl GROUP BY addr ORDER BY 평균키 DESC ;
