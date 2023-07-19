@@ -178,3 +178,55 @@ SELECT
 	name, height FROM userTbl 
     WHERE height IN((SELECT min(height) FROM userTbl),
     (SELECT max(height) FROM userTbl));
+
+-- avg() -평균을 구해주는 집계함수
+-- 합계랑 개수를 구해서 평균을 계산할 수도 있다.
+SELECT 
+sum(height),count(height), (sum(height)/count(height))
+FROM userTbl;
+
+-- avg() 함수를 쓸 수도 있다.
+SELECT avg(height) FROM userTbl;
+
+SELECT avg(height) AS '평균키' FROM userTbl;
+
+-- 분산
+-- 확률변수가 기댓값으로부터 얼마나 떨어진 곳에 분표하는지를 가늠하는 숫자
+-- (실제값 - 평균값) 을 제곱하여 더한 뒤 전체 행 개수로 나눔
+SELECT variance(height) FROM userTbl;
+
+SELECT avg(height) FROM userTbl;
+SELECT 
+	sum((height-175.8182)*(height-175.8182))
+FROM userTbl;
+
+SELECT 
+	sum((height-175.8182)*(height-175.8182))/11
+FROM userTbl;
+
+-- 30.694214876364 | 30.694214876364
+
+-- 표준편차 - 분산의 제곱근
+SELECT STD(height) FROM userTbl;
+
+SELECT * FROM buyTbl ORDER BY userID DESC;
+
+-- buyTbl에서 각 회원 당 총 구매량을 구하세요.
+SELECT userID, SUM(amount) FROM buyTbl GROUP BY userID;
+-- userID로 묶었으니까(GROUP BY), 
+-- userID를 검색에 포함시켜서 같이 출력할 수 있다.
+-- group by 로 안묶은 속성은 같이 출력할 수 없다.
+
+-- buyTbl에서 각 회원 당 총 구매액을 구하세요.
+-- 구매액을 내림차순으로 구하고 3개만 출력
+SELECT * FROM buyTbl;
+	SELECT userID, SUM(PRICE*amount) AS '구매액'
+FROM buyTbl GROUP BY userID ORDER BY 구매액 DESC LIMIT 3;
+
+-- buyTbl 테이블의 상품 그룹별 판매 금액 합계 출력
+SELECT groupname,SUM(PRICE * AMOUNT) AS '판매금액 합계' 
+FROM buyTbl GROUP BY groupname;
+
+-- 지역별 평균 키를 역순으로 정렬하여 출력
+SELECT * FROM usertbl;
+SELECT addr,AVG(height) FROM userTbl GROUP BY addr;
