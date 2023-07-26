@@ -219,6 +219,72 @@ empno, ename,
  FROM emp;
 
 -- 특정 문자의 위치를 알려주는 함수
-SELECT instr('WELCOME TO MYSQL');
-SELECT instr('welcome to mysql');
-SELECT instr('이것이 MYSQL이다');
+-- 대소문자 구분하지 않는다. 
+-- 대문자로 검색하든, 소문자로 검색하든 결과는 같다.
+SELECT instr('WELCOME TO MYSQL', 'O');
+SELECT instr('welcome to mysql', 'O');
+-- 문자열을 검색하면 그 문자열로 '시작하는 위치'(시작점)를 알려준다.
+SELECT instr('이것이 MYSQL이다', '이다');
+-- 자바에서 indexOf, lastIndexOf 랑 같은 역할을 함.
+-- mysql에서는 뒤에서부터 인덱스 위치 검색하는 건 없다. 무조건 앞에서만 검색
+
+SELECT 
+	empno AS '사원번호',
+    ename AS '사원이름',
+    substr(hiredate,1,(instr(hiredate,'-')-1)) AS '입사년도',
+   substr(hiredate,(instr(hiredate,'-')+1),2) AS '입사월'
+    FROM emp;
+    
+-- 문자열에 공백을 제거하는 함수 -> trim() 과 같음. 
+SELECT '                      MySQL';
+SELECT ltrim('                 MySQL'); -- 왼쪽의 공백을 제거
+SELECT rtrim('MySQL                 '); -- 오른쪽의 공백을 제거
+SELECT trim('a' FROM 'aaaaaMySQLaaaaa'); -- 좌우에 지정한 문자를 제거
+SELECT trim(' ' FROM '      MySQL    '); -- 좌우에 공백을 제거
+
+-- concat : 넘겨받은 매개변수들을 묶어서 새로운 문자열 생성
+SELECT concat(ename, '은 ',sal, '을 받습니다.') FROM emp;
+
+-- 현재 날짜와 시간의 값을 출력하는 함수
+SELECT 
+	sysdate(), -- 년월일 시분초, 함수가 호출되는 시점의 시간
+    now(),     -- 년월일 시분초, 쿼리가 호출되는 시점의 시간
+    curdate(), -- 날짜 - 년월일
+    curtime(), -- 시간 - 시분초
+    current_timestamp() -- 년월일 시분초
+    FROM DUAL;
+
+-- 한 쿼리 안에서 2개의 함수의 처리시간이 동일해야 한다면 now()를 써야 한다.
+SELECT now(), SLEEP(2), now();
+
+-- 한 쿼리 안에서 2개의 함수 처리시간이 달라야 한다면 sysdate()를 써야 한다.
+SELECT sysdate(), SLEEP(2), sysdate();
+
+
+-- 특정 기간에 따른 시간 정보 확인
+SELECT sysdate() FROM DUAL;
+
+-- 현재 시간을 기준으로 어제와 내일 날짜 및 시간을 출력
+-- year, month, day, hour, minute, second 라는 키워드 사용할 수 있다. 
+-- INTERVAL은 간격. 앞에 플러스 마이너스는 전 후.
+SELECT sysdate() - INTERVAL 1 day AS 어제,
+		sysdate() AS 오늘,
+		sysdate() + INTERVAL 1 day AS 내일;
+        
+        
+-- 한달 전
+SELECT sysdate() - INTERVAL 1 month AS 한달전;
+-- 2년 전
+SELECT sysdate() - INTERVAL 2 year AS 2년전;
+
+-- 두시간 사이의 간격(차이)를 계산 하는 함수
+-- timestampdiff
+SELECT empno, ename, hiredate, now(),
+timestampdiff(year, hiredate, now())
+FROM emp;
+
+-- 날짜 계산 함수
+SELECT now(), date_add(now(), INTERVAL 1 MINUTE) AS '1분 후';
+SELECT now(), date_add(now(), INTERVAL -1 MINUTE) AS '1분 전';
+SELECT now(), date_sub(now(), INTERVAL 1 HOUR) AS '1시간 전';
+SELECT now(), date_sub(now(), INTERVAL -1 HOUR) AS '1시간 후';
