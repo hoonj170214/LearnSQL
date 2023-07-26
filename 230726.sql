@@ -52,7 +52,7 @@ CREATE TABLE dev3(SELECT * FROM employees.employees);
 -- data 삭제
 SELECT * FROM dev1;
 /*
-DELETE : 데이터만 삭제(속도 느림)
+DELETE : 데이터만 삭제(트랜잭션 로그를 기록하기 때문에 속도 느림)
 TRUNCATE : 행정보를 삭제, 컬럼값만 남아 있음.(속도 빠름)
 DROP : 테이블 삭제
 DELETE는 롤백 가능, TRUNCATE, DROP은 롤백 불가능
@@ -72,3 +72,61 @@ rollback;
 TRUNCATE TABLE dev3;
 SELECT * FROM dev3;
 DROP TABLE dev3;
+
+/*
+DDL을 이용하여 사용자 계정 생성
+DCL을 이용하여 권한 부여 및 회수
+-DCL : Data Control Language
+: 데이터 베이스에 접근하는 객체들의 권한을 부여하고 회수하는 명령어들.
+	-GRANT : 권한 부여
+    -REBOKE : 권한 제거
+    -COMMIT : 처리 적용
+    -ROLLBACK : 처리 취소
+
+*/
+-- 내 컴퓨터 ip주소 : 10.100.203.15 -> 대신에 localhost 를 사용할 수 있음.
+-- 10.100.203.15 == 내컴퓨터 ip주소 == localhost == 127.0.0.1(IPv4)
+
+-- 사용자 계정 정보 확인
+show databases;
+-- 사용자 계정 정보를 담고 있는 테이블 사용 
+use mysql;
+-- 맨 밑에 'user'가 사용자 정보를 담고 있다.
+SHOW TABLES;
+-- 조회
+SELECT * FROM user;
+
+-- 사용자계정 생성, 
+-- user1이 사용자 이름, 
+-- 'localhost'에서만 접근가능하고, 
+-- 비번은 12345
+CREATE USER user1@'localhost' IDENTIFIED BY '12345';
+
+-- % 는 어떤 컴퓨터던지 상관없이 접근가능하다는 뜻.
+-- 동일한 username이라도 접근가능한 컴퓨터가 다르면 다른 계정으로 취급
+CREATE USER user1@'%' IDENTIFIED BY '54321';
+
+-- 유저 계정정보 삭제
+Drop user user1@'%';
+
+CREATE USER 'pm'@'10.100.203.15' IDENTIFIED BY '1234';
+-- 계정명@'접속위치'
+-- host 가 % : 어디서나 접근 가능
+-- 특정 컴퓨터 주소 사용가능
+-- 10.100.203.%  -> 10.100.203. 안에 있는 모든 컴퓨터는 접속 가능하다 는 뜻
+-- 10.100.203.15_ -> 뒤에  
+
+SELECT user, host FROM user;
+
+-- 계정명이 호스트까지 포함된다.
+-- 사용자의 권한 보기
+SHOW GRANTS FOR pm@'10.100.203.15';
+ 
+ -- grant 권한 종류 ON 권한으로 사용이 가능한 database.table TO 사용자계정;
+-- WITH GRANT OPTION 권한 부여 옵션 추가 
+-- 사용자에게 
+-- 모든 권한(all)
+-- (*.*) == ( 모든 데이터베이스 . 모든 테이블 ) 
+-- with grant option == 다른 사용자에게 권한을 줄 수 있는 권한
+-- 부여해주기
+GRANT ALL ON *.* TO pm@'10.100.203.15' WITH GRANT OPTION;
