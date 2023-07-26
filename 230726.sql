@@ -288,3 +288,75 @@ SELECT now(), date_add(now(), INTERVAL 1 MINUTE) AS '1분 후';
 SELECT now(), date_add(now(), INTERVAL -1 MINUTE) AS '1분 전';
 SELECT now(), date_sub(now(), INTERVAL 1 HOUR) AS '1시간 전';
 SELECT now(), date_sub(now(), INTERVAL -1 HOUR) AS '1시간 후';
+
+-- 시간형식의 데이터를 우리가 지정한 형식의 문자열로 반환
+-- pattern에 따라서 기준시간을 변환
+-- date_format(기준시간, pattern);
+/*
+	PATTERN 문자
+    %Y 4자리 년도 			%y 2자리 년도
+    %M 숫자 월(2자리)		%C 월(1자리)
+    %M 긴 월(영문)			%b 짧은 월(영문) EX)JUN
+    %d 일자(두자리)		%e 일자 (한자리)
+    %W (요일 이름 영문) 	%a (짧은 영문 요일)
+    %I 시간(12)			%H 시간(24)
+    %i 분				%S 초
+    
+    단축시간 PATTERN
+    %r %I%I:%i%i:%S%S AM, PM
+    %T %H%H:%i%i:%S%S
+*/
+SELECT now(), date_format(now(), '%Y년%m월%d일 %T') AS 'PATTERN';
+
+-- ---------------------------------------------------------------
+
+-- PREPARE 구문
+CREATE TABLE tbl_member(
+	num int PRIMARY KEY AUTO_INCREMENT, -- 회원 번호
+    id VARCHAR(50) NOT NULL UNIQUE,		-- 회원 아이디
+    pw VARCHAR(200) NOT NULL,			-- 비밀번호
+    name VARCHAR(20) NOT NULL
+);
+
+INSERT INTO tbl_member(id, pw, name) 
+VALUES
+('id001','pw001','최기근'),
+('id002','pw002','뿡뿡이'),
+('id003','pw003','펭수');
+
+-- Query 질의문을 먼저 준비(등록) 시켜 놓고 
+-- 쿼리 실행에 필요한 값을 나중에 대입하여 실행하는 질의문
+-- 등록
+-- PREPARE 이름 FROM '질의문'
+-- 실행
+-- EXECUTE prepare이름 USING '추가해야할 data';
+
+PREPARE mQuery FROM
+'SELECT ename, sal FROM emp ORDER BY sal LIMIT ?';
+
+SET @tempVal = 3;
+EXECUTE mQuery USING @tempVal;
+
+
+SET @tempVal = 10;
+EXECUTE mQuery USING @tempVal;
+
+SELECT * FROM tbl_member WHERE id = 'id001' AND pw = 'pw001';
+
+-- id001'; -- ' 을 id에 삽입한다면?
+-- 비밀번호 없이 로그인이 가능해진다.
+-- 해킹되는 거임.
+-- sql injection : sql문 안에 변형된 쿼리를 주입해서 침입
+-- 그래서 PREPARE 가 필요한 것임.
+SELECT * FROM tbl_member WHERE id = 'id001'; -- ''AND pw = 'pw001';
+
+PREPARE memberQuery FROM
+'SELECT * FROM tbl_member WHERE id = ? AND pw = ?';
+
+SET @id = 'id001'; 
+-- id 뒤에 --'' 을 넣어도 달라지는게 없다. 
+-- sql 인젝션을 막을 수 있다.
+-- prepare을 사용해야 하는 이유
+SET @pw = 'pw001';
+EXECUTE memberQuery USING @id, @pw;
+
