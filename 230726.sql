@@ -114,7 +114,7 @@ CREATE USER 'pm'@'10.100.203.15' IDENTIFIED BY '1234';
 -- host 가 % : 어디서나 접근 가능
 -- 특정 컴퓨터 주소 사용가능
 -- 10.100.203.%  -> 10.100.203. 안에 있는 모든 컴퓨터는 접속 가능하다 는 뜻
--- 10.100.203.15_ -> 뒤에  
+-- 10.100.203.15_ -> 뒤에 1자리만 더 올 수 있음.
 
 SELECT user, host FROM user;
 
@@ -130,3 +130,95 @@ SHOW GRANTS FOR pm@'10.100.203.15';
 -- with grant option == 다른 사용자에게 권한을 줄 수 있는 권한
 -- 부여해주기
 GRANT ALL ON *.* TO pm@'10.100.203.15' WITH GRANT OPTION;
+
+/*
+- MySql 사용자 변수 초기화 및 선언
+SET 명령어를 통해 변수 선언.
+MySQL 변수는 값이 대입될때 타입이 결정되므로
+선언과 동시에 초기화가 되어야 함.
+변수와 식별자를 구분하기 위해서 변수이름 앞에 @를 부여하여 표시.
+변수의 값의 대입 연산자는 = , := 두가지 키워드 사용가능하나
+query문과 구분하기 위해 :=를 사용하여 변수의 값을 할당함.
+*/
+
+SET @myVal = 10;
+-- select를 사용해서 조회
+-- 변수나 함수의 결과값을 확인하기 위해 제공되는 가상의 table DUAL
+-- 값을 확인하기 위해 제공되는 의미없는 테이블이므로 생략해도 결과는 같다.
+SELECT @myVal FROM DUAL;
+-- 생략해도 괜찮음.
+SELECT @myVal;
+
+-- mysql에서는 문자열개념이 없다. 그래서 '랑 " 아무거나 써도 됨.
+-- 다른 sql에서는 '만 써야 하니까 되도록 ' 쓰자.
+SET @myVal2 := 3;
+SET @myVal3 := 3.141592;
+SET @myVal4 := '이름->';
+SET @myVal5 := "문자열";
+
+-- 선언된 변수는 현재 세션에서만 쓸 수 있다.
+SELECT @myVal2 + @myVal3 FROM DUAL;
+
+-- 문자열은 연산할 수 없다.
+-- 연산할 수 없는 문자는 0이 된다.
+-- 문자열(0) + 3
+SELECT @myVal5 + @myVal2;
+
+-- 0 + 0
+SELECT @myVal4 + @myVal5;
+
+SELECT @myVal4, name FROM userTbl WHERE height > 180;
+-- 문자열을 연산할 수 없다. 
+-- 문자열 앞에 숫자로 시작하면 숫자만 연산된다. 
+SELECT '32강' + '16강';
+
+-- 숫자로 시작하지 않으면 그 문자열은 0으로 처리됨.
+SELECT '32강' + '강16';
+
+SELECT @myVal4 + ':' + @myVal5;
+
+SELECT concat(@myVal4, ':' , @myVal5);
+
+/*
+mysql 내장함수
+	- 특정 기능을 수행할 수있도록 MySQL에서 미리 만들어 둔 함수 
+    - 
+*/
+
+-- 현재 데이터베이스와 연결되어 작업을 수행하는 계정
+SELECT current_user();  -- FROM DUAL;
+SELECT user() FROM DUAL;
+
+-- 문자열 관련된 함수
+SELECT 
+	'Welcome to MySQL', 
+    upper('Welcome to MySQL'), -- 대문자
+    lower('Welcome to MySQL'); -- 소문자
+    
+-- 문자열 길이 - byte, 한글은 한 글자당 3byte로 취급
+SELECT length('MySQL'), length('마이에스큐엘');
+
+SELECT @temp := 'Welcome to MySQL';
+-- 문자열 추출
+-- (추출할 문자열, 시작 위치, 개수)
+Select substr(@temp,4,3);
+-- 시작위치가 음수면 뒤에서부터 검색
+SELECT substr(@temp, -3, 3);
+commit;
+
+USE develop_sql;
+-- 사원테이블 검색
+SELECT * FROM emp;
+-- hiredate 입사일 : 0000-00-00 
+SELECT hiredate FROM emp;
+-- 사원의 정보를 사원번호, 사원명, 입사년도, 입사 월로 검색
+SELECT 
+empno, ename,
+ substr(hiredate,1,4) AS '입사년도',
+ substr(hiredate,6,2) AS '입사 월'
+ FROM emp;
+
+-- 특정 문자의 위치를 알려주는 함수
+SELECT instr('WELCOME TO MYSQL');
+SELECT instr('welcome to mysql');
+SELECT instr('이것이 MYSQL이다');
