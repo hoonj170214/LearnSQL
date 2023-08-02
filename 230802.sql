@@ -362,7 +362,50 @@ UNION ALL
 SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 10)
 ORDER BY deptno DESC; 
 
+/*
+	INDEX - 색인 목록
+    DATA를 검색하기 위한 COLUMN에 부여되는 정렬값
+    책의 목차 처럼 해당 COLUMN을 기준으로 정렬
+    
+    퍼포먼스 향상을 위해서 사용
+    
+    KEY 제약조건은 행을 구분짓는 COLUMN임으로
+    생성시 인덱스가 부여됨.
+*/
 
+DESC emp;
+
+-- 인덱스 속성 확인
+SHOW INDEXES FROM emp;
+
+-- 인덱스 생성
+-- CREATE INDEX '인덱스 이름' ON 'table명'('부여할 속성 이름');
+CREATE INDEX inx_eno_sal ON emp(sal);
+
+ALTER TABLE emp ADD INDEX idx_emp_sal(sal);
+
+-- index 삭제
+-- DROP INDEX 인덱스 이름 ON db.table;
+DROP INDEX index_eno_sal ON develop_sql.emp;
+DROP INDEX inx_eno_sal ON develop_sql.emp;
+-- ALTER TABLE db.테이블명 DROP INDEX 인덱스 이름;
+ALTER TABLE develop_sql.emp DROP INDEX idx_emp_sal;
+
+SHOW INDEXES FROM emp;
+
+USE employees;
+
+SHOW tables;
+
+SELECT count(*) FROM employees;
+
+-- employees 테이블의 인덱스 확인
+SHOW INDEXES FROM employees;
+
+DESC employees;
+
+-- 성별을 조건으로 검색
+SELECT * FROM employees WHERE gender = 'm'; -- 29434.75
 
 
 
