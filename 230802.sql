@@ -328,18 +328,39 @@ D.dname, E.deptno, E.avgSal, S.grade
 from avg_group_emp E natural join dept D JOIN salgrade S
 ON E.avgSal Between S.losal and s.hisal;
 
--- 스카라 서브쿼리 사용 예
+-- 스칼라 서브쿼리 사용 예
+-- 검색하고자 하는 속성에 select가 들어가면 스칼라 서브쿼리 라고 한다.
 -- emp table에서 사원의 이름과 해당 사원을 관리하는 매니저 이름 출력
 select
-	ename AS 사원이름
-    (SELECT ename FROM emp AS B WHERE )
+	ename AS 사원이름,
+    (SELECT ename FROM emp AS B WHERE A.mgr = B.empno) AS 매니저
 from emp AS A ORDER BY empno DESC;
 
+/*
+	VIEW 를 활용하여 검색 결과에 대한 데이터를 
+    합집합 또는 교집합으로 결합하는 명령어 
+			#UNION
+    2개 이상의 검색 쿼리 결과를 단일 결과를 연결
+    UNION 		-> 교집합(중복 데이터는 제외)
+    UNION ALL   -> 합집합(중복된 데이터도 결과에 포함)
+*/
 
 
+(SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 20
+UNION
+SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 10);
 
+-- 중복 제외
+(SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 20 OR deptno = 10
+UNION
+SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 10); 
 
-
+-- 중복을 제외하지 않고 모든 결과 포함
+-- ORDER BY 가능
+(SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 20 OR deptno = 10
+UNION ALL
+SELECT empno, ename, sal, deptno FROM emp WHERE deptno = 10)
+ORDER BY deptno DESC; 
 
 
 
