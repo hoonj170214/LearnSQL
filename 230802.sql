@@ -175,11 +175,127 @@ FROM emp e NATURAL JOIN dept d LEFT JOIN salgrade s
 ON e.sal BETWEEN s.losal AND s.hisal
 ORDER BY s.grade;
 
+/*
+	VIEW - 가상의 테이블
+    - 물리적으로 저장 공간을 가지고 있지 않지만
+    SELECT 문을 통해 생성된 구조 정보를 가지고 있음
+    
+    VIEW 생성
+    CREATE VIEW AS SELECT
+    
+    VIEW 사용 - 일반 테이블 사용법과 동일
+	
+    - 뷰는 기본적으로 '읽기 전용'으로 많이 사용하지만
+	- 뷰를 통해서 원테이블의 데이터를 수정할 수도 있다.
+    
+    - 뷰의 장점
+    1. 보안에 도움이 된다. -> 뷰에 보여주고 싶은 속성만 보여줄 수 있으니까.
+    2. 복잡한 쿼리를 단순화 할 수 있다.
+*/
+
+DESC emp;
+-- 뷰 생성
+CREATE VIEW v_emp AS SELECT empno, ename FROM emp;
+
+desc v_emp;
+
+select * FROM v_emp;
+
+-- 뷰 삭제
+DROP VIEW IF EXISTS v_emp;
+
+/*
+	- SELECT 문의 결과를 이름을 가지는 뷰라는 개체
+    저장하여 생성
+    실제 데이터를 비추는 창에 비유
+    검색된 COLUMN으로 데이터를 불러오기 때문에 
+    실제 저장된 테이블 값을 보호하는 보안 목적으로 사용
+    VIEW를 사용하는 사용자는 사용되고 있는 데이터가 
+    실제 테이블인지 가상의 테이블(VIEW)인지 구별하기 힘듬
+    실제 테이블의 구조를 파악하기 힘들다.
+*/
+
+use sqldb;
+
+show tables;
+
+-- CREATE OR REPLACE VIEW : 생성하거나 아니면 뷰로 대체해라
+-- 
+CREATE OR REPLACE VIEW v_usertbl AS
+SELECT userID, name FROM usertbl;
+
+-- 원테이블 조회
+SELECT * FROM usertbl;
+
+-- 뷰 조회
+SELECT * FROM v_usertbl;
+
+DESC v_usertbl;
 
 
+INSERT INTO v_usertbl VALUES('CGG', '최기근');
+-- Error Code: 1423. Field of view 'sqldb.v_usertbl' 
+-- underlying table doesn't have a default value -> 에러 뜸.
+-- 에러 이유(뜻)	
+-- not null인 속성을 모두 입력해야 insert할 수 있다. 
+
+DESC usertbl;
+
+INSERT INTO v_usertbl 
+VALUES('CGG', '최기근', 1982,'부산', null, null, 184, curdate());
+-- 윗 문장 실행시키면 에러 뜸.
+-- Error Code: 1136. 
+-- Column count doesn't match value count at row 1	
+-- 에러 뜻
+-- 뷰에는 2개의 속성만 정의되어있기 때문에 만약에 insert할 거면 
+-- 뷰랑 원테이블 데이터랑 둘 다 insert 해줘야 한다.
+-- 뷰는 이렇게 잘못 인서트 하는 것을 미연에 방지해준다. 굿!
+
+SELECT * FROM userTbl WHERE userID = 'HGD';
+
+-- 뷰를 통해서 원 테이블의 데이터를 수정(update) 할 수 있다. 
+UPDATE v_userTbl SET name = '최기근'
+WHERE userID = 'HGD';
 
 
+-- 구매목록 테이블에 들어가 있으니까 뷰의 데이터가 삭제 안됨.
+DELETE FROM v_usertbl WHERE userID = 'HGD';
 
+-- 구매목록 테이블에 아이디를 삭제하자
+DELETE FROM buytbl WHERE userID= 'HGD';
 
+-- 뷰를 조회해보자
+SELECT * FROM v_usertbl WHERE userID = 'HGD';
+
+rollback;
+
+-- 사용자별 구매 목록을 사용자 정보와 함께 출력
+CREATE OR REPLACE VIEW v_user_buy AS 
+SELECT * FROM usertbl AS U JOIN buytbl AS B
+USING(userID);
+
+DESC buytbl;
+
+DESC v_user_buy;
+SELECT * FROM v_user_buy;
+
+-- 검색쿼리 안에서 가상의 뷰를 생성하는 것 
+-- inline view(인라인 뷰)
+-- FROM 절에서 사용되는 서브쿼리
+-- 서브쿼리에서 조회한 결과를 하나의 테이블처럼 사용하고 싶을 때 사용
+-- 테이블에서 조회한 컬럼만 조회가 가능
+
+/*
+	#Sub Query
+    - 스칼라 서브쿼리(Scalar Sub Query) : 하나의 컬럼처럼 사용(표현 용도)
+    SELECT col1, (SELECT ...) FROM tbl ....
+    
+    - 인라인 뷰(Inline View) : 하나의 테이블처럼 사용(테이블 대체 용도)
+    SELECT ... FROM (SELECT ...)
+    
+    - 일반 Sub Query : 하나의 변수 처럼 사용(결과에 영향을 주는 조건절)
+    WHERE col1 = (SELECT ...)
+    
+*/
 
 
