@@ -404,8 +404,23 @@ SHOW INDEXES FROM employees;
 
 DESC employees;
 
--- 성별을 조건으로 검색
+-- 성별을 조건으로 검색 
 SELECT * FROM employees WHERE gender = 'm'; -- 29434.75
+
+-- index로 지정한 후에 성능(비용)(Execution Plan) 
+-- 비용이 확연하게 줄었다! 퍼포먼스 향상!
+CREATE INDEX idx_emp_gender ON employees(gender); -- 15297.95
+
+/*
+	인덱스는 자주 사용하지 COLUMN에 생성하지 않는 것이 좋음.
+    저장 공간을 차지하기 때문에.
+    인덱스가 부여된 COLUMN에 삽입 수정 삭제 작업이 일어나면 
+    인덱스 정보를 새로 생성해야하기 때문에 성능이 저하됨.
+    데이터 변경이 자주 일어나지 않는 테이블과 column에 
+    생성하는 것이 유리
+*/
+
+
 
 
 
