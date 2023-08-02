@@ -52,6 +52,7 @@ select * from emp, dept WHERE emp.deptno = dept.deptno;
 	- INNER JOIN
 	기준 테이블과 JOIN 테이블 모두 데이터가 존재해야 조회
     결합 상태는 CROSS JOIN과 동일
+    양쪽 테이블에 모두 내용이 있는 데이터만 조인
     
     - 책
     SELECT 열목록 
@@ -132,6 +133,7 @@ WHERE A.mgr = B.empno;
     - JOIN 조건에 만족하지 않는 행 정보도 남아있는 테이블의 값이 존재하면 
     - 검색에 포함
     - 조인의 조건에 만족되지 않는 행까지도 포함시키는 것
+    - 한쪽에만 내용이 있어도 결과가 표시되는 조인
     
     - 책
     SELECT 열목록
@@ -165,11 +167,19 @@ select * from salgrade;
 select * from emp e LEFT JOIN salgrade s
 ON e.sal between s.losal and s.hisal;
 
-/*
-	--JOIN
-    -- 각 사원의 급여 등급을 사원명, 부서명, 급여, 급여 등급으로 검색
-    
-*/
+
+-- 각 사원의 급여 등급을 사원명, 부서명, 급여, 급여 등급으로 검색
+SELECT 
+	e.ename, d.dname, e.sal, s.grade
+FROM emp e NATURAL JOIN dept d LEFT JOIN salgrade s
+ON e.sal BETWEEN s.losal AND s.hisal
+ORDER BY s.grade;
+
+
+
+
+
+
 
 
 

@@ -354,7 +354,7 @@ PREPARE memberQuery FROM
 'SELECT * FROM tbl_member WHERE id = ? AND pw = ?';
 
 SET @id = 'id001'; 
--- id 뒤에 --'' 을 넣어도 달라지는게 없다. 
+-- id 뒤에 --''; 을 넣어도 달라지는게 없다. 
 -- sql 인젝션을 막을 수 있다.
 -- prepare을 사용해야 하는 이유
 SET @pw = 'pw001';
