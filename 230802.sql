@@ -296,6 +296,52 @@ SELECT * FROM v_user_buy;
     - 일반 Sub Query : 하나의 변수 처럼 사용(결과에 영향을 주는 조건절)
     WHERE col1 = (SELECT ...)
     
+    INLINE VIEW(인라인 뷰)
+    - VIEW를 미리 정의하지 않고 검색 쿼리 내에서 정의해서 사용하는 VIEW
+    - sub query가 FROM절에서 table을 대체하는 경우
+    - 검색된 결과를 하나의 테이블처럼 사용
+    
 */
+
+USE develop_sql;
+
+-- 인라인 뷰를 이용해서 부서별 평균 급여가 2500 이상인 부서의
+-- 부서 번호, 평균 급여 검색
+-- 인라인뷰를 사용할 때는 무조건 AS 별칭을 지정해줘야 한다. 
+SELECT * FROM
+(SELECT deptno, avg(sal) AS 평균급여 FROM emp GROUP BY deptno) AS temp
+WHERE 평균급여 >= 2500;
+
+-- 부서별 평균급여와 평균급여등급을 인라인 뷰를 이용해서 출력
+SELECT E.avgSal, salgrade.grade FROM
+(SELECT deptno, avg(sal) AS avgSal FROM emp GROUP BY deptno) AS E
+JOIN salgrade ON E.avgSal BETWEEN salgrade.losal and salgrade.hisal;
+
+-- Question 
+-- 부서별 평균 급여와 급여등급을 부서이름, 평균급여, 평균급여등급 형식으로 출력
+SELECT D.dname, E.deptno, E.avgSal, S.grade FROM
+(SELECT deptno, avg(sal) AS avgSal FROM emp GROUP BY deptno) 
+AS E NATURAL JOIN dept D, salgrade S ;
+-- WHERE E.deptno = D.deptno
+select
+D.dname, E.deptno, E.avgSal, S.grade
+from avg_group_emp E natural join dept D JOIN salgrade S
+ON E.avgSal Between S.losal and s.hisal;
+
+-- 스카라 서브쿼리 사용 예
+-- emp table에서 사원의 이름과 해당 사원을 관리하는 매니저 이름 출력
+select
+	ename AS 사원이름
+    (SELECT ename FROM emp AS B WHERE )
+from emp AS A ORDER BY empno DESC;
+
+
+
+
+
+
+
+
+
 
 
