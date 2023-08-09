@@ -188,10 +188,8 @@ rollback;
 /*
 -- 저장 프로시저 매개변수의 3가지 모드
 MODE 매개변수이름 데이터타입(사이즈)
+
 IN , OUT , INOUT
-
-
-
 
 */
 
@@ -206,15 +204,98 @@ commit;
 -- 아이디와 패스워드가 일치하는 행이 검색되면 true
 -- 존재하지 않으면 false 를 반환
 DELIMITER $$
-	CREATE PROCEDURE loginCheck()
+	CREATE PROCEDURE loginCheck(
+		IN _id VARCHAR(50),
+        IN _pw VARCHAR(50),
+        OUT answer BOOLEAN 
+    )
     BEGIN
+		-- 검색결과를 문자열로 저장할 변수 
+        DECLARE result VARCHAR(50);
+        
+        SET result = (SELECT id FROM tbl_member 
+        WHERE id = _id AND pw = _pw);
+        IF (result IS NOT NULL) THEN
+			SELECT TRUE INTO answer;
+        ELSE 
+			SELECT FALSE INTO answer;
+        END IF;
     END$$
 DELIMITER ;
 
+CALL loginCheck('id001','pw001', @answer); -- 입력된 값 (회원)
+CALL loginCheck('id005','pw005', @answer); -- 입력되지 않은 값 (비회원)
 
+-- answer라는 변수에 어떤 값이 들어가 있는지 확인
+SELECT @answer FROM DUAL;
+SELECT @answer;
 
+DROP PROCEDURE loginCheck;
 
+/*
+	저장함수(Stored Function)
+    사용자가 정의하여 사용하는 사용자 정의형 함수
+    저장 프로시저와 유사하나 결과값을 반환한다는 개념이 틀림
+    SELECT INTO와 같이 집합된 결과를 반환
+    
+    다른 DBMS에서는 스토어드 프로시저를 저장프로시저라고 부름
+    스토어드 함수를 사용자 정의 함수라고 부름
+*/
 
+-- 함수 선언
+/*
+	DELIMITER $$
+		CREATE FUNCTION 함수이름(매개변수...)
+        RETURNS 반환타입
+        BEGIN
+			-- 실행 내용 작성
+            RETURN 결과값;
+        END $$
+	DELIMITER ;
 
+*/
+
+-- 함수 생성 가능 여부 확인
+SHOW GLOBAL VARIABLES LIKE 'autocommit';  -- on -> 오토커밋을 제어'할 수 있다' 는 뜻.
+SHOW GLOBAL VARIABLES LIKE 'log_bin_trust_function_creators';
+SET GLOBAL log_bin_trust_function_creators = 1;
+
+DELIMITER $$
+	CREATE FUNCTION sumFunc(value1 INT, value2 INT)
+    RETURNS INT 
+    BEGIN 
+		RETURN value1 + value2;
+    END $$
+DELIMITER ;
+
+-- 생성된 함수 정보 확인
+SHOW FUNCTION STATUS;
+SHOW FUNCTION STATUS WHERE db = 'develop_sql';
+
+SELECT sumFunc(100, 300) FROM DUAL;
+
+-- Question
+-- 출생년도(INT)를 입력받아 현재 나이를 반환하는 함수 정의
+DELIMITER //
+	CREATE FUNCTION age(birthYear INT)
+    RETURNS INT 
+    BEGIN 
+        SET @age = YEAR(curdate()) - birthYear;
+		RETURN @age;
+    END //
+DELIMITER ;
+
+-- 함수의 결과값 출력
+SELECT age(2000);
+
+-- 함수의 결과값을 변수에 저장 후 출력
+SELECT age(2000) INTO @age2000;
+SELECT @age2000;
+
+SELECT USERID, name, birthYear, age(birthYear) AS '나이'
+FROM sqldb.userTbl;
+
+-- 함수 삭제하기
+DROP FUNCTION sumFunc;
 
 
