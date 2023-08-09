@@ -298,4 +298,89 @@ FROM sqldb.userTbl;
 -- 함수 삭제하기
 DROP FUNCTION sumFunc;
 
+/*
+	트리거(Trigger)
+    지정한 테이블에 INSERT, UPDATE, DELETE 같은 변경 작업이 
+    수행되었을 때를 전후로 하여 등록된 Query문을 자동으로 수행하도록 작성된 프로그램
+    
+	DELIMITER $$
+		CREATE TRIGGER 'trigger_name'
+			{BEFORE | AFTER}
+            {INSERT | UPDATE | DELETE}
+            ON 'table_name' FOR EACH ROW
+            BEGIN
+				-- trigger 가 수행할 작업(내용)
+            END $$
+	DELIMITER ;
 
+*/
+
+DELIMITER //
+	CREATE TRIGGER test_trg         -- 트리거 식별자 지정
+		AFTER				    	-- 수행 시점
+        INSERT						-- 트리거가 수행할 쿼리
+        ON tbl_member FOR EACH ROW  -- 트리거가 수행될 테이블 지정 
+        BEGIN
+			SET @result = 'tbl_member INSERT';
+        END //
+DELIMITER ;
+
+SHOW TRIGGERS;
+
+SHOW TRIGGERS FROM develop_sql;
+
+SELECT @result;
+DESC tbl_member;
+INSERT INTO tbl_member(id, pw, name)
+VALUE('id003','pw003', '김유신');
+
+CREATE TABLE back_tbl_member LIKE tbl_member;
+DESC back_tbl_member;
+SELECT * FROM back_tbl_member;
+
+-- tbl_member 테이블에서 회원정보가 삭제되고 난후
+-- 삭제된 회원 정보를 back_tbl_member table 에 저장
+DELIMITER $$
+	CREATE TRIGGER backup_trg
+    AFTER DELETE 
+    ON tbl_member FOR EACH ROW
+    BEGIN
+		-- OLD  UPDATE , DELETE - 변경되기 전 기존 정보 
+        -- NEW  INSERT , UPDATE - 새롭게 추가된 정보
+        INSERT INTO back_tbl_member(num, id, pw, name)
+		VALUES(OLD.num, OLD.id, OLD.PW, OLD.name);
+    END $$
+DELIMITER ;
+
+SELECT * FROM back_tbl_member;
+SELECT * FROM tbl_member;
+
+DELETE FROM tbl_member WHERE num = 6;
+
+	-- NEW
+    -- INSERT 문으로 삽입되기전에 
+    -- 새로운 데이터의 검증을 지정하는 Trigger 생성
+    
+use sqldb;
+DESC usertbl;
+DELIMITER //
+	CREATE TRIGGER before_usertbl
+    BEFORE INSERT
+    ON usertbl FOR EACH ROW
+    BEGIN
+		IF NEW.birthYear < 1900 THEN
+			SET NEW.birthYear = 0;
+		ELSEIF NEW.birthYear > year(now()) THEN
+            SET NEW.birthYear = year(now());
+        END IF;
+    END //
+DELIMITER ;
+
+INSERT INTO userTbl
+VALUES('JJH','전지현', 1880, '서울', null, null, 170, curdate());
+INSERT INTO userTbl
+VALUES('KHS','김혜수', 2440, '서울', null, null, 168, curdate());
+INSERT INTO userTbl
+VALUES('PBY','박보영', 1995, '서울', null, null, 160, curdate());
+
+SELECT * FROM userTbl;
